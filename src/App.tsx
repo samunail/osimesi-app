@@ -67,7 +67,7 @@ function App() {
                 onClick={() => setIsAddModalOpen(true)}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
-                新規登録
+                お店を登録
               </button>
             </div>
           </div>
