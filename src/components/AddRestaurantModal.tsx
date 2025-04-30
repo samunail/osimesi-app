@@ -145,13 +145,25 @@ const AddRestaurantModal: React.FC<AddRestaurantModalProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!location) return;
+    if (!location) {
+      alert("位置情報を選択してください");
+      return;
+    }
+    if (!name.trim()) {
+      alert("店名を入力してください");
+      return;
+    }
+    if (!photo) {
+      alert("写真を選択してください");
+      return;
+    }
 
     onAdd({
       name,
       photoUrl: photo,
       memo,
       location,
+      isFavorite: false,
     });
 
     setName("");

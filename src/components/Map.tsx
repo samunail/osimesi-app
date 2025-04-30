@@ -5,16 +5,14 @@ import { Restaurant } from "../types";
 
 interface MapProps {
   restaurants: Restaurant[];
-  onMarkerClick: (restaurant: Restaurant) => void;
-  onLocationSelect: (lat: number, lng: number) => void;
+  onRestaurantClick: (restaurant: Restaurant) => void;
   focusedRestaurant: Restaurant | null;
   setFocusedRestaurant: (restaurant: Restaurant | null) => void;
 }
 
 const Map: React.FC<MapProps> = ({
   restaurants,
-  onMarkerClick,
-  onLocationSelect,
+  onRestaurantClick,
   focusedRestaurant,
   setFocusedRestaurant,
 }) => {
@@ -45,7 +43,19 @@ const Map: React.FC<MapProps> = ({
       document.head.appendChild(style);
 
       map.on("click", (e: L.LeafletMouseEvent) => {
-        onLocationSelect(e.latlng.lat, e.latlng.lng);
+        const newRestaurant: Restaurant = {
+          id: Date.now().toString(),
+          name: "新しいレストラン",
+          photoUrl: "",
+          memo: "",
+          location: {
+            lat: e.latlng.lat,
+            lng: e.latlng.lng,
+          },
+          createdAt: new Date().toISOString(),
+          isFavorite: false,
+        };
+        onRestaurantClick(newRestaurant);
       });
 
       mapRef.current = map;
@@ -110,7 +120,7 @@ const Map: React.FC<MapProps> = ({
           offset: [0, -10],
         });
 
-      marker.on("click", () => onMarkerClick(restaurant));
+      marker.on("click", () => onRestaurantClick(restaurant));
       markersRef.current.push(marker);
       markerMapRef.current[restaurant.id] = marker;
     });

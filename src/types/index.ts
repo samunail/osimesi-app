@@ -8,4 +8,5 @@ export interface Restaurant {
     lng: number;
   };
   createdAt: string;
+  isFavorite: boolean;
 }

@@ -6,6 +6,8 @@ import RestaurantList from "./components/RestaurantList";
 
 const STORAGE_KEY = "osimesi-restaurants";
 
+type SortOption = "name" | "date" | "favorite";
+
 function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -17,11 +19,19 @@ function App() {
   const [focusedRestaurant, setFocusedRestaurant] = useState<Restaurant | null>(
     null
   );
+  const [sortOption, setSortOption] = useState<SortOption>("date");
 
   useEffect(() => {
     const savedRestaurants = localStorage.getItem(STORAGE_KEY);
     if (savedRestaurants) {
-      setRestaurants(JSON.parse(savedRestaurants));
+      const parsedRestaurants = JSON.parse(savedRestaurants);
+      const restaurantsWithFavorite = parsedRestaurants.map(
+        (restaurant: Restaurant) => ({
+          ...restaurant,
+          isFavorite: restaurant.isFavorite ?? false,
+        })
+      );
+      setRestaurants(restaurantsWithFavorite);
     }
   }, []);
 
@@ -29,13 +39,33 @@ function App() {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
   }, [restaurants]);
 
+  const handleDeleteRestaurant = (restaurantId: string) => {
+    setRestaurants(
+      restaurants.filter((restaurant) => restaurant.id !== restaurantId)
+    );
+  };
+
   const handleAddRestaurant = (
-    restaurantData: Omit<Restaurant, "id" | "createdAt">
+    restaurantData: Omit<Restaurant, "id" | "createdAt" | "isFavorite">
   ) => {
+    if (!restaurantData.name.trim()) {
+      alert("店名を入力してください");
+      return;
+    }
+    if (!restaurantData.location) {
+      alert("位置情報を選択してください");
+      return;
+    }
+    if (!restaurantData.photoUrl) {
+      alert("写真を選択してください");
+      return;
+    }
+
     const newRestaurant: Restaurant = {
       ...restaurantData,
       id: Date.now().toString(),
       createdAt: new Date().toISOString(),
+      isFavorite: false,
     };
     setRestaurants([...restaurants, newRestaurant]);
   };
@@ -49,6 +79,38 @@ function App() {
     setViewMode("map");
     setFocusedRestaurant(restaurant);
   };
+
+  const toggleFavorite = (restaurantId: string) => {
+    setRestaurants(
+      restaurants.map((restaurant) =>
+        restaurant.id === restaurantId
+          ? { ...restaurant, isFavorite: !restaurant.isFavorite }
+          : restaurant
+      )
+    );
+  };
+
+  const sortedRestaurants = [...restaurants].sort((a, b) => {
+    switch (sortOption) {
+      case "name":
+        return a.name.localeCompare(b.name, "ja");
+      case "date":
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      case "favorite":
+        return (
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+      default:
+        return 0;
+    }
+  });
+
+  const filteredRestaurants =
+    sortOption === "favorite"
+      ? sortedRestaurants.filter((restaurant) => restaurant.isFavorite)
+      : sortedRestaurants;
 
   return (
     <div className="min-h-screen bg-gray-100">
@@ -78,18 +140,32 @@ function App() {
         {viewMode === "map" ? (
           <div style={{ display: isAddModalOpen ? "none" : "block" }}>
             <Map
-              restaurants={restaurants}
-              onMarkerClick={handleRestaurantClick}
-              onLocationSelect={handleLocationSelect}
+              restaurants={filteredRestaurants}
+              onRestaurantClick={handleRestaurantClick}
               focusedRestaurant={focusedRestaurant}
               setFocusedRestaurant={setFocusedRestaurant}
             />
           </div>
         ) : (
-          <RestaurantList
-            restaurants={restaurants}
-            onRestaurantClick={handleRestaurantClick}
-          />
+          <div>
+            <div className="mb-4 flex gap-4">
+              <select
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value as SortOption)}
+                className="px-4 py-2 border rounded"
+              >
+                <option value="date">追加日時順</option>
+                <option value="name">五十音順</option>
+                <option value="favorite">お気に入りのみ表示</option>
+              </select>
+            </div>
+            <RestaurantList
+              restaurants={filteredRestaurants}
+              onRestaurantClick={handleRestaurantClick}
+              onToggleFavorite={toggleFavorite}
+              onDelete={handleDeleteRestaurant}
+            />
+          </div>
         )}
       </main>
 
