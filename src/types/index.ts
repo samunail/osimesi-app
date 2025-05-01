@@ -10,3 +10,11 @@ export interface Restaurant {
   createdAt: string;
   isFavorite: boolean;
 }
+
+export type Theme = "light" | "dark";
+export type Language = "ja" | "en";
+
+export interface Settings {
+  theme: Theme;
+  language: Language;
+}

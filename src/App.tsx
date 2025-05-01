@@ -1,16 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { Restaurant } from "./types";
+import { Restaurant, Settings } from "./types";
+import { ja, en } from "./locales";
 import Map from "./components/Map";
 import AddRestaurantModal from "./components/AddRestaurantModal";
 import RestaurantList from "./components/RestaurantList";
+import SettingsModal from "./components/SettingsModal";
 
 const STORAGE_KEY = "osimesi-restaurants";
+const SETTINGS_KEY = "osimesi-settings";
 
-type SortOption = "name" | "date" | "favorite";
+type SortOption = "newest" | "oldest" | "favorites";
 
 function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isSettingsModalOpen, setIsSettingsModalOpen] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
@@ -19,7 +23,15 @@ function App() {
   const [focusedRestaurant, setFocusedRestaurant] = useState<Restaurant | null>(
     null
   );
-  const [sortOption, setSortOption] = useState<SortOption>("date");
+  const [sortOption, setSortOption] = useState<SortOption>("newest");
+  const [settings, setSettings] = useState<Settings>(() => {
+    const savedSettings = localStorage.getItem(SETTINGS_KEY);
+    return savedSettings
+      ? JSON.parse(savedSettings)
+      : { theme: "light", language: "ja" };
+  });
+
+  const t = settings.language === "ja" ? ja : en;
 
   useEffect(() => {
     const savedRestaurants = localStorage.getItem(STORAGE_KEY);
@@ -38,6 +50,14 @@ function App() {
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
   }, [restaurants]);
+
+  useEffect(() => {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    document.documentElement.classList.toggle(
+      "dark",
+      settings.theme === "dark"
+    );
+  }, [settings]);
 
   const handleDeleteRestaurant = (restaurantId: string) => {
     setRestaurants(
@@ -92,13 +112,15 @@ function App() {
 
   const sortedRestaurants = [...restaurants].sort((a, b) => {
     switch (sortOption) {
-      case "name":
-        return a.name.localeCompare(b.name, "ja");
-      case "date":
+      case "newest":
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
-      case "favorite":
+      case "oldest":
+        return (
+          new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+        );
+      case "favorites":
         return (
           new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
@@ -108,17 +130,25 @@ function App() {
   });
 
   const filteredRestaurants =
-    sortOption === "favorite"
+    sortOption === "favorites"
       ? sortedRestaurants.filter((restaurant) => restaurant.isFavorite)
       : sortedRestaurants;
 
   return (
-    <div className="min-h-screen bg-gray-100">
-      <header className="bg-white shadow">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
+      <header className="bg-white dark:bg-gray-800 shadow">
         <div className="max-w-7xl mx-auto px-4 py-6">
           <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">推し飯</h1>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              {t.app.title}
+            </h1>
             <div className="flex gap-4">
+              <button
+                onClick={() => setIsSettingsModalOpen(true)}
+                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+              >
+                {t.app.settings}
+              </button>
               <button
                 onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
@@ -129,7 +159,7 @@ function App() {
                 onClick={() => setIsAddModalOpen(true)}
                 className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
               >
-                お店を登録
+                {t.app.addRestaurant}
               </button>
             </div>
           </div>
@@ -152,11 +182,11 @@ function App() {
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value as SortOption)}
-                className="px-4 py-2 border rounded"
+                className="px-4 py-2 border rounded dark:bg-gray-800 dark:text-white dark:border-gray-600"
               >
-                <option value="date">追加日時順</option>
-                <option value="name">五十音順</option>
-                <option value="favorite">お気に入りのみ表示</option>
+                <option value="newest">{t.sort.newest}</option>
+                <option value="oldest">{t.sort.oldest}</option>
+                <option value="favorites">{t.sort.favorites}</option>
               </select>
             </div>
             <RestaurantList
@@ -177,6 +207,13 @@ function App() {
         }}
         onAdd={handleAddRestaurant}
         selectedLocation={selectedLocation}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsModalOpen}
+        onClose={() => setIsSettingsModalOpen(false)}
+        settings={settings}
+        onSettingsChange={setSettings}
       />
     </div>
   );
