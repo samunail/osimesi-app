@@ -5,6 +5,7 @@ import Map from "./components/Map";
 import AddRestaurantModal from "./components/AddRestaurantModal";
 import RestaurantList from "./components/RestaurantList";
 import SettingsModal from "./components/SettingsModal";
+import UserMenu from "./components/UserMenu";
 
 const STORAGE_KEY = "osimesi-restaurants";
 const SETTINGS_KEY = "osimesi-settings";
@@ -30,6 +31,7 @@ function App() {
       ? JSON.parse(savedSettings)
       : { theme: "light", language: "ja" };
   });
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const t = settings.language === "ja" ? ja : en;
 
@@ -142,25 +144,19 @@ function App() {
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
               {t.app.title}
             </h1>
-            <div className="flex gap-4">
-              <button
-                onClick={() => setIsSettingsModalOpen(true)}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
-                {t.app.settings}
-              </button>
+            <div className="flex gap-4 items-center">
               <button
                 onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
                 className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
               >
                 {viewMode === "map" ? "一覧表示" : "地図表示"}
               </button>
-              <button
-                onClick={() => setIsAddModalOpen(true)}
-                className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
-              >
-                {t.app.addRestaurant}
-              </button>
+              <UserMenu
+                isOpen={isUserMenuOpen}
+                onOpen={() => setIsUserMenuOpen(true)}
+                onClose={() => setIsUserMenuOpen(false)}
+                onSettingsOpen={() => setIsSettingsModalOpen(true)}
+              />
             </div>
           </div>
         </div>
@@ -197,6 +193,14 @@ function App() {
             />
           </div>
         )}
+        <div className="flex justify-center mt-8">
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 shadow"
+          >
+            {t.app.addRestaurant}
+          </button>
+        </div>
       </main>
 
       <AddRestaurantModal
