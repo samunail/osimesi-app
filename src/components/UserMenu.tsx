@@ -57,19 +57,19 @@ const UserMenu: React.FC<UserMenuProps> = ({
           style={{ zIndex: 9999 }}
         >
           <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
             onClick={onClose}
           >
             ログイン
           </button>
           <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
             onClick={onClose}
           >
             フレンド
           </button>
           <button
-            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
             onClick={() => {
               onSettingsOpen();
               onClose();

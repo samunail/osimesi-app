@@ -165,12 +165,14 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 py-6">
         {viewMode === "map" ? (
           <div style={{ display: isAddModalOpen ? "none" : "block" }}>
-            <Map
-              restaurants={filteredRestaurants}
-              onRestaurantClick={handleRestaurantClick}
-              focusedRestaurant={focusedRestaurant}
-              setFocusedRestaurant={setFocusedRestaurant}
-            />
+            <div className="mb-4">
+              <Map
+                restaurants={filteredRestaurants}
+                onRestaurantClick={handleRestaurantClick}
+                focusedRestaurant={focusedRestaurant}
+                setFocusedRestaurant={setFocusedRestaurant}
+              />
+            </div>
           </div>
         ) : (
           <div>
