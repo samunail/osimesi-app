@@ -6,6 +6,11 @@ interface UserMenuProps {
   onOpen: () => void;
   onClose: () => void;
   onSettingsOpen: () => void;
+  menuLabels: {
+    login: string;
+    friend: string;
+    settings: string;
+  };
 }
 
 const UserMenu: React.FC<UserMenuProps> = ({
@@ -13,6 +18,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
   onOpen,
   onClose,
   onSettingsOpen,
+  menuLabels,
 }) => {
   const menuRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
@@ -49,13 +55,13 @@ const UserMenu: React.FC<UserMenuProps> = ({
         className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
         onClick={onClose}
       >
-        ログイン
+        {menuLabels.login}
       </button>
       <button
         className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
         onClick={onClose}
       >
-        フレンド
+        {menuLabels.friend}
       </button>
       <button
         className="block w-full text-left px-4 py-2 hover:bg-gray-100 dark:hover:bg-gray-700 text-gray-900 dark:text-white"
@@ -64,7 +70,7 @@ const UserMenu: React.FC<UserMenuProps> = ({
           onClose();
         }}
       >
-        設定
+        {menuLabels.settings}
       </button>
     </div>
   ) : null;

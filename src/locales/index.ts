@@ -32,6 +32,11 @@ export interface Translations {
     nameRequired: string;
     photoRequired: string;
   };
+  viewModeList: string;
+  viewModeMap: string;
+  menuLogin: string;
+  menuFriend: string;
+  menuSettings: string;
 }
 
 export { ja } from "./ja";

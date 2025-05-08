@@ -2,7 +2,7 @@ import type { Translations } from "./index";
 
 export const ja: Translations = {
   app: {
-    title: "レストランマップ",
+    title: "推し飯",
     addRestaurant: "レストランを追加",
     settings: "設定",
   },
@@ -34,4 +34,9 @@ export const ja: Translations = {
     nameRequired: "店名を入力してください",
     photoRequired: "写真を選択してください",
   },
+  viewModeList: "一覧表示",
+  viewModeMap: "地図表示",
+  menuLogin: "ログイン",
+  menuFriend: "フレンド",
+  menuSettings: "設定",
 };

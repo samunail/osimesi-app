@@ -148,13 +148,18 @@ function App() {
               onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
               className="px-5 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded-full shadow hover:scale-105 hover:bg-gray-300 dark:hover:bg-slate-600 transition"
             >
-              {viewMode === "map" ? "一覧表示" : "地図表示"}
+              {viewMode === "map" ? t.viewModeList : t.viewModeMap}
             </button>
             <UserMenu
               isOpen={isUserMenuOpen}
               onOpen={() => setIsUserMenuOpen(true)}
               onClose={() => setIsUserMenuOpen(false)}
               onSettingsOpen={() => setIsSettingsModalOpen(true)}
+              menuLabels={{
+                login: t.menuLogin,
+                friend: t.menuFriend,
+                settings: t.menuSettings,
+              }}
             />
           </div>
         </div>

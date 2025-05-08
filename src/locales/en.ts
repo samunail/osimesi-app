@@ -2,7 +2,7 @@ import type { Translations } from "./index";
 
 export const en: Translations = {
   app: {
-    title: "Restaurant Map",
+    title: "OSHIMESI",
     addRestaurant: "Add Restaurant",
     settings: "Settings",
   },
@@ -34,4 +34,9 @@ export const en: Translations = {
     nameRequired: "Please enter a name",
     photoRequired: "Please select a photo",
   },
+  viewModeList: "List View",
+  viewModeMap: "Map View",
+  menuLogin: "Login",
+  menuFriend: "Friend",
+  menuSettings: "Settings",
 };
