@@ -138,34 +138,32 @@ function App() {
 
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
-      <header className="bg-white dark:bg-gray-800 shadow">
-        <div className="max-w-7xl mx-auto px-4 py-6">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              {t.app.title}
-            </h1>
-            <div className="flex gap-4 items-center">
-              <button
-                onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
-                className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
-              >
-                {viewMode === "map" ? "一覧表示" : "地図表示"}
-              </button>
-              <UserMenu
-                isOpen={isUserMenuOpen}
-                onOpen={() => setIsUserMenuOpen(true)}
-                onClose={() => setIsUserMenuOpen(false)}
-                onSettingsOpen={() => setIsSettingsModalOpen(true)}
-              />
-            </div>
+      <header className="backdrop-blur bg-slate-900/90 shadow-lg">
+        <div className="max-w-7xl mx-auto px-4 py-6 flex justify-between items-center">
+          <h1 className="text-3xl font-extrabold text-white tracking-wide drop-shadow">
+            {t.app.title}
+          </h1>
+          <div className="flex gap-4 items-center">
+            <button
+              onClick={() => setViewMode(viewMode === "map" ? "list" : "map")}
+              className="px-5 py-2 bg-gray-200 dark:bg-slate-700 dark:text-white rounded-full shadow hover:scale-105 hover:bg-gray-300 dark:hover:bg-slate-600 transition"
+            >
+              {viewMode === "map" ? "一覧表示" : "地図表示"}
+            </button>
+            <UserMenu
+              isOpen={isUserMenuOpen}
+              onOpen={() => setIsUserMenuOpen(true)}
+              onClose={() => setIsUserMenuOpen(false)}
+              onSettingsOpen={() => setIsSettingsModalOpen(true)}
+            />
           </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 py-6">
+      <main className="max-w-7xl mx-auto px-4 py-10">
         {viewMode === "map" ? (
           <div style={{ display: isAddModalOpen ? "none" : "block" }}>
-            <div className="mb-4">
+            <div className="h-[600px] rounded-2xl overflow-hidden box-border">
               <Map
                 restaurants={filteredRestaurants}
                 onRestaurantClick={handleRestaurantClick}
@@ -180,7 +178,7 @@ function App() {
               <select
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value as SortOption)}
-                className="px-4 py-2 border rounded dark:bg-gray-800 dark:text-white dark:border-gray-600"
+                className="px-4 py-2 border rounded-lg dark:bg-gray-800 dark:text-white dark:border-gray-600 shadow"
               >
                 <option value="newest">{t.sort.newest}</option>
                 <option value="oldest">{t.sort.oldest}</option>
@@ -195,10 +193,10 @@ function App() {
             />
           </div>
         )}
-        <div className="flex justify-center mt-8">
+        <div className="flex justify-center mt-10">
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 shadow"
+            className="px-8 py-3 bg-gradient-to-r from-blue-500 to-indigo-500 text-white font-semibold rounded-full shadow-lg hover:scale-105 hover:shadow-xl"
           >
             {t.app.addRestaurant}
           </button>
