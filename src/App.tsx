@@ -7,10 +7,22 @@ import RestaurantList from "./components/RestaurantList";
 import SettingsModal from "./components/SettingsModal";
 import UserMenu from "./components/UserMenu";
 
-const STORAGE_KEY = "osimesi-restaurants";
+const API_URL = "http://localhost:8000/api/restaurants/";
 const SETTINGS_KEY = "osimesi-settings";
 
 type SortOption = "newest" | "oldest" | "favorites";
+
+function toCamelCaseRestaurant(apiData: any): Restaurant {
+  return {
+    id: apiData.id.toString(),
+    name: apiData.name,
+    photoUrl: apiData.photo_url,
+    memo: apiData.memo,
+    location: { lat: apiData.lat, lng: apiData.lng },
+    createdAt: apiData.created_at,
+    isFavorite: apiData.is_favorite,
+  };
+}
 
 function App() {
   const [restaurants, setRestaurants] = useState<Restaurant[]>([]);
@@ -35,23 +47,12 @@ function App() {
 
   const t = settings.language === "ja" ? ja : en;
 
+  // Django REST APIからレストラン一覧を取得
   useEffect(() => {
-    const savedRestaurants = localStorage.getItem(STORAGE_KEY);
-    if (savedRestaurants) {
-      const parsedRestaurants = JSON.parse(savedRestaurants);
-      const restaurantsWithFavorite = parsedRestaurants.map(
-        (restaurant: Restaurant) => ({
-          ...restaurant,
-          isFavorite: restaurant.isFavorite ?? false,
-        })
-      );
-      setRestaurants(restaurantsWithFavorite);
-    }
+    fetch(API_URL)
+      .then((res) => res.json())
+      .then((data) => setRestaurants(data.map(toCamelCaseRestaurant)));
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(restaurants));
-  }, [restaurants]);
 
   useEffect(() => {
     localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
@@ -61,12 +62,7 @@ function App() {
     );
   }, [settings]);
 
-  const handleDeleteRestaurant = (restaurantId: string) => {
-    setRestaurants(
-      restaurants.filter((restaurant) => restaurant.id !== restaurantId)
-    );
-  };
-
+  // レストラン追加
   const handleAddRestaurant = (
     restaurantData: Omit<Restaurant, "id" | "createdAt" | "isFavorite">
   ) => {
@@ -82,34 +78,66 @@ function App() {
       alert("写真を選択してください");
       return;
     }
-
-    const newRestaurant: Restaurant = {
-      ...restaurantData,
-      id: Date.now().toString(),
-      createdAt: new Date().toISOString(),
-      isFavorite: false,
-    };
-    setRestaurants([...restaurants, newRestaurant]);
+    fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: restaurantData.name,
+        photo_url: restaurantData.photoUrl,
+        memo: restaurantData.memo,
+        lat: restaurantData.location.lat,
+        lng: restaurantData.location.lng,
+        is_favorite: false,
+      }),
+    })
+      .then((res) => res.json())
+      .then((newRestaurant) =>
+        setRestaurants((prev) => [
+          ...prev,
+          toCamelCaseRestaurant(newRestaurant),
+        ])
+      );
   };
 
-  const handleLocationSelect = (lat: number, lng: number) => {
-    setSelectedLocation({ lat, lng });
-    setIsAddModalOpen(true);
+  // レストラン削除
+  const handleDeleteRestaurant = (restaurantId: string) => {
+    fetch(`${API_URL}${restaurantId}/`, {
+      method: "DELETE",
+    }).then(() =>
+      setRestaurants((prev) => prev.filter((r) => r.id !== restaurantId))
+    );
+  };
+
+  // お気に入り切り替え
+  const toggleFavorite = (restaurantId: string) => {
+    const restaurant = restaurants.find((r) => r.id === restaurantId);
+    if (!restaurant) return;
+    fetch(`${API_URL}${restaurant.id}/`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: restaurant.name,
+        photo_url: restaurant.photoUrl,
+        memo: restaurant.memo,
+        lat: restaurant.location.lat,
+        lng: restaurant.location.lng,
+        is_favorite: !restaurant.isFavorite,
+        created_at: restaurant.createdAt,
+      }),
+    })
+      .then((res) => res.json())
+      .then((updated) =>
+        setRestaurants((prev) =>
+          prev.map((r) =>
+            r.id === updated.id ? toCamelCaseRestaurant(updated) : r
+          )
+        )
+      );
   };
 
   const handleRestaurantClick = (restaurant: Restaurant) => {
     setViewMode("map");
     setFocusedRestaurant(restaurant);
-  };
-
-  const toggleFavorite = (restaurantId: string) => {
-    setRestaurants(
-      restaurants.map((restaurant) =>
-        restaurant.id === restaurantId
-          ? { ...restaurant, isFavorite: !restaurant.isFavorite }
-          : restaurant
-      )
-    );
   };
 
   const sortedRestaurants = [...restaurants].sort((a, b) => {
