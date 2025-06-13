@@ -2,7 +2,7 @@ from django.db import models
 
 class Restaurant(models.Model):
     name = models.CharField(max_length=255)
-    photo_url = models.URLField()
+    photo = models.ImageField(upload_to='restaurant_photos/', blank=True, null=True)
     memo = models.TextField(blank=True)
     lat = models.FloatField()
     lng = models.FloatField()
