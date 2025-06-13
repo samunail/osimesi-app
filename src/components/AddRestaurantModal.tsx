@@ -6,7 +6,13 @@ import "leaflet/dist/leaflet.css";
 interface AddRestaurantModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (restaurant: Omit<Restaurant, "id" | "createdAt">) => void;
+  onAdd: (restaurant: {
+    name: string;
+    photoFile: File;
+    memo: string;
+    location: { lat: number; lng: number };
+    isFavorite: boolean;
+  }) => void;
   selectedLocation: { lat: number; lng: number } | null;
 }
 
@@ -17,7 +23,7 @@ const AddRestaurantModal: React.FC<AddRestaurantModalProps> = ({
   selectedLocation,
 }) => {
   const [name, setName] = useState("");
-  const [photo, setPhoto] = useState<string>("");
+  const [photo, setPhoto] = useState<File | null>(null);
   const [memo, setMemo] = useState("");
   const [location, setLocation] = useState<{ lat: number; lng: number } | null>(
     selectedLocation
@@ -133,14 +139,8 @@ const AddRestaurantModal: React.FC<AddRestaurantModalProps> = ({
   }, [isOpen, selectedLocation]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setPhoto(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
+    const file = e.target.files?.[0] || null;
+    setPhoto(file);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -160,14 +160,14 @@ const AddRestaurantModal: React.FC<AddRestaurantModalProps> = ({
 
     onAdd({
       name,
-      photoUrl: photo,
+      photoFile: photo,
       memo,
       location,
       isFavorite: false,
     });
 
     setName("");
-    setPhoto("");
+    setPhoto(null);
     setMemo("");
     onClose();
   };

@@ -6,6 +6,7 @@ import AddRestaurantModal from "./components/AddRestaurantModal";
 import RestaurantList from "./components/RestaurantList";
 import SettingsModal from "./components/SettingsModal";
 import UserMenu from "./components/UserMenu";
+import ConfirmModal from "./components/ConfirmModal";
 
 const API_URL = "http://localhost:8000/api/restaurants/";
 const SETTINGS_KEY = "osimesi-settings";
@@ -14,13 +15,20 @@ type SortOption = "newest" | "oldest" | "favorites";
 
 function toCamelCaseRestaurant(apiData: any): Restaurant {
   return {
-    id: apiData.id.toString(),
-    name: apiData.name,
-    photoUrl: apiData.photo_url,
-    memo: apiData.memo,
-    location: { lat: apiData.lat, lng: apiData.lng },
-    createdAt: apiData.created_at,
-    isFavorite: apiData.is_favorite,
+    id:
+      apiData && apiData.id !== undefined && apiData.id !== null
+        ? apiData.id.toString()
+        : "",
+    name: apiData?.name ?? "",
+    photoUrl: apiData?.photo
+      ? apiData.photo.startsWith("http")
+        ? apiData.photo
+        : `http://localhost:8000${apiData.photo}`
+      : "",
+    memo: apiData?.memo ?? "",
+    location: { lat: apiData?.lat ?? 0, lng: apiData?.lng ?? 0 },
+    createdAt: apiData?.created_at ?? "",
+    isFavorite: apiData?.is_favorite ?? false,
   };
 }
 
@@ -44,6 +52,8 @@ function App() {
       : { theme: "light", language: "ja" };
   });
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState<Restaurant | null>(null);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
   const t = settings.language === "ja" ? ja : en;
 
@@ -63,9 +73,13 @@ function App() {
   }, [settings]);
 
   // レストラン追加
-  const handleAddRestaurant = (
-    restaurantData: Omit<Restaurant, "id" | "createdAt" | "isFavorite">
-  ) => {
+  const handleAddRestaurant = (restaurantData: {
+    name: string;
+    photoFile: File;
+    memo: string;
+    location: { lat: number; lng: number };
+    isFavorite: boolean;
+  }) => {
     if (!restaurantData.name.trim()) {
       alert("店名を入力してください");
       return;
@@ -74,21 +88,21 @@ function App() {
       alert("位置情報を選択してください");
       return;
     }
-    if (!restaurantData.photoUrl) {
+    if (!restaurantData.photoFile) {
       alert("写真を選択してください");
       return;
     }
+    const formData = new FormData();
+    formData.append("name", restaurantData.name);
+    formData.append("photo", restaurantData.photoFile);
+    formData.append("memo", restaurantData.memo);
+    formData.append("lat", String(restaurantData.location.lat));
+    formData.append("lng", String(restaurantData.location.lng));
+    formData.append("is_favorite", String(restaurantData.isFavorite));
+
     fetch(API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        name: restaurantData.name,
-        photo_url: restaurantData.photoUrl,
-        memo: restaurantData.memo,
-        lat: restaurantData.location.lat,
-        lng: restaurantData.location.lng,
-        is_favorite: false,
-      }),
+      body: formData,
     })
       .then((res) => res.json())
       .then((newRestaurant) =>
@@ -164,6 +178,24 @@ function App() {
       ? sortedRestaurants.filter((restaurant) => restaurant.isFavorite)
       : sortedRestaurants;
 
+  const handleDeleteRequest = (restaurant: Restaurant) => {
+    setDeleteTarget(restaurant);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      handleDeleteRestaurant(deleteTarget.id);
+    }
+    setIsDeleteModalOpen(false);
+    setDeleteTarget(null);
+  };
+
+  const handleCancelDelete = () => {
+    setIsDeleteModalOpen(false);
+    setDeleteTarget(null);
+  };
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <header className="backdrop-blur bg-slate-900/90 shadow-lg">
@@ -222,7 +254,7 @@ function App() {
               restaurants={filteredRestaurants}
               onRestaurantClick={handleRestaurantClick}
               onToggleFavorite={toggleFavorite}
-              onDelete={handleDeleteRestaurant}
+              onDeleteRequest={handleDeleteRequest}
             />
           </div>
         )}
@@ -251,6 +283,16 @@ function App() {
         onClose={() => setIsSettingsModalOpen(false)}
         settings={settings}
         onSettingsChange={setSettings}
+      />
+
+      <ConfirmModal
+        isOpen={isDeleteModalOpen}
+        message={t.restaurant.deleteConfirm}
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancelDelete}
+        okLabel={t.restaurant.delete}
+        cancelLabel={t.restaurant.cancel}
+        darkMode={settings.theme === "dark"}
       />
     </div>
   );

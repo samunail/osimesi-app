@@ -1,1 +1,0 @@
-# osimesi-app
