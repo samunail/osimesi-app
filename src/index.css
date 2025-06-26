@@ -1,0 +1,46 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  margin: 0;
+  font-family: "Inter", "Noto Sans JP", "Helvetica Neue", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: linear-gradient(135deg, #232526 0%, #414345 100%);
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
+    monospace;
+}
+
+header {
+  background: rgba(30, 41, 59, 0.95) !important;
+  box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(8px);
+}
+
+h1 {
+  letter-spacing: 0.05em;
+}
+
+.leaflet-container,
+.leaflet-top,
+.leaflet-bottom,
+.leaflet-control,
+.leaflet-pane,
+.leaflet-map-pane,
+.leaflet-tile-pane,
+.leaflet-overlay-pane,
+.leaflet-shadow-pane,
+.leaflet-marker-pane,
+.leaflet-tooltip-pane,
+.leaflet-popup-pane {
+  z-index: 0 !important;
+}
+
+button,
+select {
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
