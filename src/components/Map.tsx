@@ -131,13 +131,7 @@ const Map: React.FC<MapProps> = ({
     if (!mapRef.current || !focusedRestaurant) return;
     const marker = markerMapRef.current[focusedRestaurant.id];
     if (marker) {
-      mapRef.current.setView(
-        [focusedRestaurant.location.lat, focusedRestaurant.location.lng],
-        16,
-        { animate: true }
-      );
       marker.openPopup();
-      setFocusedRestaurant(null); // 一度開いたらリセット
     }
   }, [focusedRestaurant, setFocusedRestaurant]);
 

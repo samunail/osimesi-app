@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Restaurant, Settings } from "./types";
 import { ja, en } from "./locales";
 import Map from "./components/Map";
@@ -196,6 +196,13 @@ function App() {
     setDeleteTarget(null);
   };
 
+  // viewModeがmapに切り替わるたびにカードをリセット
+  useEffect(() => {
+    if (viewMode === "map") {
+      setFocusedRestaurant(null);
+    }
+  }, [viewMode]);
+
   return (
     <div className="min-h-screen bg-gray-100 dark:bg-gray-900">
       <header className="backdrop-blur bg-slate-900/90 shadow-lg">
@@ -228,7 +235,7 @@ function App() {
       <main className="max-w-7xl mx-auto px-4 py-10">
         {viewMode === "map" ? (
           <div style={{ display: isAddModalOpen ? "none" : "block" }}>
-            <div className="h-[600px] rounded-2xl overflow-hidden box-border">
+            <div className="h-[600px] rounded-2xl overflow-hidden box-border mb-8">
               <Map
                 restaurants={filteredRestaurants}
                 onRestaurantClick={handleRestaurantClick}
@@ -236,6 +243,57 @@ function App() {
                 setFocusedRestaurant={setFocusedRestaurant}
               />
             </div>
+            {/* --- ここからカード表示 --- */}
+            {focusedRestaurant && (
+              <div
+                className="max-w-xl mx-auto mb-8 bg-white dark:bg-gray-800 rounded-xl shadow-lg flex flex-col md:flex-row items-center p-6 gap-6 border border-gray-200 dark:border-gray-700"
+                style={{ pointerEvents: "auto" }}
+              >
+                <img
+                  src={focusedRestaurant.photoUrl}
+                  alt={focusedRestaurant.name}
+                  className="w-32 h-32 object-cover rounded-lg border border-gray-200 dark:border-gray-700"
+                />
+                <div className="flex-1">
+                  <h2 className="text-2xl font-bold mb-2 dark:text-white">
+                    {focusedRestaurant.name}
+                  </h2>
+                  <p className="text-gray-600 dark:text-gray-300 mb-2">
+                    {focusedRestaurant.memo}
+                  </p>
+                  <p className="text-sm text-gray-400 dark:text-gray-400 mb-1">
+                    緯度: {focusedRestaurant.location.lat}, 経度:{" "}
+                    {focusedRestaurant.location.lng}
+                  </p>
+                  <p className="text-xs text-gray-400 dark:text-gray-500">
+                    登録日:{" "}
+                    {new Date(focusedRestaurant.createdAt).toLocaleString()}
+                  </p>
+                </div>
+                <button
+                  className="ml-auto text-gray-400 hover:text-gray-600 dark:hover:text-white"
+                  onClick={() => setFocusedRestaurant(null)}
+                  aria-label="カードを閉じる"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="24"
+                    height="24"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+            {/* --- カード表示ここまで --- */}
           </div>
         ) : (
           <div>
